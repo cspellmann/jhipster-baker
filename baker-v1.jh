@@ -1,0 +1,97 @@
+
+application {
+  config {
+    baseName baker
+    applicationType monolith
+    packageName de.spellmann
+    authenticationType jwt
+    prodDatabaseType postgresql
+    clientFramework angularX
+  }
+  entities *
+}
+
+enum Unit {
+    MILLIGRAMS,
+    GRAMS,
+    KILOGRAMS,
+    MILLILITRES,
+    LITRES
+}
+
+enum CostType {
+	FIXED,
+    HOURLY
+}
+
+entity Ingredient {
+	name String required
+    size Integer required
+    unit Unit required
+    price Double required
+    date LocalDate required
+}
+
+entity Part {
+	name String required
+    size Integer required
+    price Double required
+    date LocalDate required
+}
+
+entity Cost {
+	name String required
+    price Double required
+    type CostType required
+}
+
+entity RecipeItem {
+	size Integer 
+}
+
+entity Recipe {
+	name String required
+    description String
+    targetYield Integer required
+    hours Double required
+}
+
+entity BatchPart {
+	size Integer required
+}
+
+entity Batch {
+	start Instant
+    end  Instant
+    actualYield Integer
+    comment String
+}
+
+relationship ManyToOne {
+	RecipeItem{ingredient} to Ingredient
+}
+
+relationship OneToMany {
+	Recipe{costs} to Cost
+}
+
+relationship OneToMany {
+	Recipe{items} to RecipeItem{recipe}
+}
+
+relationship OneToMany {
+	Batch{recipe} to Recipe
+}
+
+relationship OneToMany {
+	BatchPart{part} to Part
+}
+
+relationship OneToMany {
+	Batch{batchPart} to BatchPart{batch}
+}
+
+paginate Batch with infinite-scroll
+paginate Recipe, Cost, Ingredient, Part with pagination
+
+service all with serviceImpl except BatchPart, RecipeItem
